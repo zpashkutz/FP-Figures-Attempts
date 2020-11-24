@@ -33,7 +33,7 @@ OTU.tableFP <- read.delim("OTU_table.txt", row.names = 1)
 #merge OTU taxonomy with OTU taxa level to filter? pls werk
 OTU.table.with.taxonomyFP <- as.data.frame(merge(OTU.taxonomyFP, 
                                                OTU.tableFP, by.x = "row.names", by.y = "row.names"))
-# hooray it works you goddamn monkey. Was that so hard, no? then why did it take you 3 hours. 
+#why did this take me so long... 
 
 #Filtering Taxa, probably omit this step since now we're down to 87 samples and the original study had 95 where only one was omitted
 #you should try this again but later
