@@ -1,7 +1,8 @@
 # Try to make a Beta Diversity plot using NMDS with the FP data by following the Alex Chase Tutorial
 
-setwd("E:/School/ICU/Bio/199/Family Project/Figs Practice/Attempting FP figs from ABC")
+setwd("E:/School/ICU/Bio/199/Family project - Quarter 1/Family Project/Figs Practice/Attempting FP figs from ABC")
 
+#libraries used 
 library(vegan)
 library(ggplot2)
 library(EcolUtils)
@@ -9,6 +10,7 @@ library(biomformat)
 library(stringr)
 library(plyr)
 library(gridExtra)
+library(readxl)
 
 #import metadata
 metadataFP <- read.delim("Microbiome_mapping_14Oct2019.txt")
@@ -17,7 +19,7 @@ str(metadataFP)
 metadataFP$X.NAME <- interaction( "X", metadataFP$X.NAME, sep = "")
 rownames(metadataFP) <- metadataFP[,1]
 metadataFP[,1] <- NULL 
-View(metadataFP)
+
 
 #get taxonomy - so functionally this will be equivalent to OTU_taxalevel from the Alex Chase tutorial 
 OTU.taxonomyFP <- read.delim("taxonomy.txt", row.names = 1)
@@ -43,12 +45,12 @@ OTU.table.with.taxonomyFP <- as.data.frame(merge(OTU.taxonomyFP,
 #OMITTING FILTERING BEFORE RAREFACTION undo "##" to enable filtering 
 ##################################################################
 #Filtering Taxa - lets try this by omitting filtering and going straight to rarefaction
-##OTU.table.filteredtaxaFP <- OTU.table.with.taxonomyFP[!grepl("Unassigned|chloroplast", 
-                                                         ##OTU.table.with.taxonomyFP$Kingdom),]
+OTU.table.filteredtaxaFP <- OTU.table.with.taxonomyFP[!grepl("Unassigned|chloroplast", 
+                                                         OTU.table.with.taxonomyFP$Kingdom),]
 #subset only OTU table with the filtered taxa
-##FPfilteredtaxa <- OTU.table.filteredtaxaFP$Row.names
-##FPfilterOTU <- subset(OTU.tableFP, rownames(OTU.tableFP) %in% FPfilteredtaxa)
-##FPfinalOTU <- FPfilterOTU[,!names(FPfilterOTU) %in% c("Mock")]
+FPfilteredtaxa <- OTU.table.filteredtaxaFP$Row.names
+FPfilterOTU <- subset(OTU.tableFP, rownames(OTU.tableFP) %in% FPfilteredtaxa)
+FPfinalOTU <- FPfilterOTU[,!names(FPfilterOTU) %in% c("Mock")]
 
 # get quartile ranges for rarefaction
 FPtransOTU <- rowSums(t(OTU.tableFP)) 
@@ -86,12 +88,10 @@ View(FPrared.OTU)
 
 
 
-
-
 #Beta-diversity NMDS plots 
 # make that bray-curtis dissimilarity matrix 
 
-NMDS.fam <- metaMDS(FPrared.OTU, distance = "bray", k = 2, trymax = 500)
+NMDS.fam <- metaMDS(FPrared.OTU, distance = "bray", k = 2, trymax = 500, wascores = T)
 
 #extract the two coordinates of the matrix 
 
@@ -101,7 +101,11 @@ coordinates.fam <- data.frame(NMDS.fam$points[,1:2])
 plot(x = coordinates.fam$MDS1, y = coordinates.fam$MDS2) 
 
 #merge with metadataFP
-nmds.fam.metadata <- merge(coordinates.fam, metadataFP, by = 0)
+nmds.fam.metadata <- merge(coordinates.fam, metadataFP, by = 0, group=metadataFP$Family)
+rownames(nmds.fam.metadata) <- nmds.fam.metadata[,1]
+nmds.fam.metadata[,1] <- NULL 
+
+
 
 Factor.F <- as.factor(nmds.fam.metadata$Family)
 
@@ -123,7 +127,7 @@ adonis(data = filtermetaFP, formula = FPrared.OTU ~ Family/ Individual/
          Individual + Family,
        permutations = 999, method = "bray")
 
-
+#plot the actual NMDS 
 ggplot(data = nmds.fam.metadata) +
   aes(x = MDS1, y = MDS2, color = Factor.F) + #Creates and colors legend to match, modify after $.
   geom_point() +
@@ -131,9 +135,26 @@ ggplot(data = nmds.fam.metadata) +
   ggtitle("NMDS of Families' Oral Microbiomes", subtitle = bquote(~R^2~ '= 0.199, p = 0.001')) + #Adds tittle and subtitle. Can modify p and r-squared values + title.
   theme_classic(base_size = 14, base_line_size = .5)
 
+#plot the actual NMDS - This one should be exactly the same as the one above
+#Here I'm going to try to use ordiellipse to make the ellipses - idk if it's gonna work tho
+
+ord <-ordiellipse(NMDS.fam, nmds.fam.metadata$Family, display = "sites", 
+                kind = "sd", conf = 0.95, label = F)
+
+df_ell <- data.frame()
+  for(g in levels(nmds.fam.metadata$Family)){
+    df_ell <- rbind(df_ell, cbind(as.data.frame(with(nmds.fam.metadata[nmds.fam.metadata$Family==g,],
+                                                    veganCovEllipse(ord[[g]]$cov,ord[[g]]$center,ord[[g]]$scale)))
+                                 ,Factor.F=g))
+}
 
 
-
+ggplot(data = nmds.fam.metadata) +
+  aes(x = MDS1, y = MDS2, color = Factor.F) + #Creates and colors legend to match, modify after $.
+  geom_point(aes(color = Factor.F)) + geom_path(data = df_ell, aes(x=MDS1, y=MDS2, color=Factor.F), size =1, linetype=1) +
+  labs(col = "Family") + #Renames legend, modifiable within quotes.
+  ggtitle("NMDS of Families' Oral Microbiomes", subtitle = bquote(~R^2~ '= 0.199, p = 0.001')) + #Adds tittle and subtitle. Can modify p and r-squared values + title.
+  theme_classic(base_size = 14, base_line_size = .5)
 
 #Make some alpha diversity plots and see if they line up with what I can generate from MicrobiomeAnalyst 
 #Originally had FPrared.OTU (2 instances below) in place of OTU.tableFP because rarefied values were used, note you must transpose the "OTU.tableFP to use" 
@@ -167,7 +188,7 @@ FPp1 <- ggplot(data = FPmerged.rich)+
   aes(x = Family.alpha, y = FPmerged.fam.alpha$alpha_shannon,
       fill = Family.alpha) +
   geom_boxplot(outlier.shape = NA, lwd = 1) + 
-  labs(title = "Alpha Diverisity Between Families", x = "Family", y = "Shannon Index", 
+  labs(title = "Alpha Diverisity Within Families", x = "Family", y = "Shannon Index", 
        fill = " Family") +
   theme_classic(base_size = 14, base_line_size = 1) +
   geom_jitter(width = .2) +
