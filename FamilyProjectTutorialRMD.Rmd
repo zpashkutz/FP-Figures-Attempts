@@ -9,4 +9,8 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Introduction 
+## Introduction
+
+The primary goal of this addendum is to foster familiarity with basic microbial data analysis and figure generation. The data provided to perform this exercise will be used to demonstrate how to create figures in R similar to those found in the main publication.[more explicit] In theory, the concepts found in this guide should be applicable to other microbial datasets with some degree of modification.  In order to complete this tutorial basic knowledge of R and its functions is assumed. In this guide concepts are explained at an introductory level supplemented by sample R code for the provided activity. Statistical explanations found in this guide are by no means comprehensive and it is the responsibility of the reader to ensure that the assumptions of any test performed are appropriate for the given data. 
+
+##R Nomenclature 
