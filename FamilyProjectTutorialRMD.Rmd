@@ -11,6 +11,27 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
-The primary goal of this addendum is to foster familiarity with basic microbial data analysis and figure generation. The data provided to perform this exercise will be used to demonstrate how to create figures in R similar to those found in the main publication.[more explicit] In theory, the concepts found in this guide should be applicable to other microbial datasets with some degree of modification.  In order to complete this tutorial basic knowledge of R and its functions is assumed. In this guide concepts are explained at an introductory level supplemented by sample R code for the provided activity. Statistical explanations found in this guide are by no means comprehensive and it is the responsibility of the reader to ensure that the assumptions of any test performed are appropriate for the given data. 
+The primary goal of this addendum is to foster familiarity with basic microbial data analysis and figure generation. The data provided to perform this exercise will be used to demonstrate how to create figures in R similar to those found in the main publication.**[more explicit]** In theory, the concepts found in this guide should be applicable to other microbial datasets with some degree of modification.  In order to complete this tutorial basic knowledge of R and its functions is assumed. In this guide concepts are explained at an introductory level supplemented by sample R code for the provided activity. Statistical explanations found in this guide are by no means comprehensive and it is the responsibility of the reader to ensure that the assumptions of any test performed are appropriate for the given data. 
 
-##R Nomenclature 
+## R Nomenclature 
+
+Here are some tips to help get through RStudio if it’s your first time using it.
+
+1. To see more information on a *function*, such as the inputs taken or output, use:
+
+`help(function)`
+or
+`?function`
+
+2. Run a line by selecting it and pressing CTRL + ENTER
+3. Regions of code that are followed by a # are comments and are not necessary for the code to run. They are to explain what the code is doing e.g.: 
+```{r}
+df <- mtcars$mpg #assign the mpg column of dataframe mtcars to df
+```
+4. To complement understanding of particular functions, whenever an existing data frame is modified or a new one is created visualize it either by clicking the data frame in the environment or using the View function e.g.:
+
+```{r}
+View(df)
+```
+ 
+
