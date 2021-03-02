@@ -71,16 +71,51 @@ OTU.table.filteredtaxaFP <- OTU.table.with.taxonomyFP[!grepl("Unassigned",
                                                         OTU.table.with.taxonomyFP$Kingdom),]
 ```
 
-Subset the original OTU table with the filtered taxa to create a filtered OTU table. 
+Subset the original OTU table with the filtered taxa to create a filtered OTU table. The filtered OTU table would be used in place of the OTU table in the subsequent steps to generate a rarefied OTU table, given that filtration is desired. 
 ```{r}
 FPfilteredtaxa <- OTU.table.filteredtaxaFP$Row.names
 FPfilterOTU <- subset(OTU.tableFP, rownames(OTU.tableFP) %in% FPfilteredtaxa)
 ```
 
+### Rarefaction 
+A re-sampling technique for richness estimation, term also used to reference a normalization technique. **go into more depth with the explanation later**
 
+Disclaimer for now: This section may be subject to significant change. 
 
+First retrieve the quartile ranges to rarefy by. Note that the ranges depend on the depth of the samples to be kept. In this example, `Q10` and `Q15` discard the bottom 10th and 15th percentiles respectively. Use the appropriate ranges for your data. 
 
+```{r}
+transOTU <- rowSums(t(OTU.tableFP)) 
+Q10 <- quantile(transOTU[order(transOTU, decreasing = TRUE)], 0.10)
+Q15 <- quantile(transOTU[order(transOTU, decreasing = TRUE)], 0.15)
+```
 
+Visualize these ranges with a barplot of our samples
+```{r}
+barplot(sort(transOTU), ylim = c(0, max(transOTU)), 
+        xlim = c(0, NROW(transOTU)), col = "Blue", ylab = "Read Depth", xlab = "Sample") 
+abline(h = c(Q10, Q15), col = c("red", "pink"))
+```
+
+Generate a rarefaction curve. If the samples begin to plateau, this is a good indication that the samples were sequenced adequately, as it is indicative of more accurately capturing the diversity of a community. 
+```{r, message=FALSE}
+library(vegan)
+```
+```{r}
+rarecurve(t(OTU.tableFP), step = 100, cex = 0.5)
+abline(v = c(Q10, Q15), col = c("red", "pink"))
+```
+  
+The next step involves cutting off the rarer data. Here we want to make as best a decision we can to keep as much data as possible while rarefying the data.
+
+```{r}
+library(EcolUtils)
+```
+```{r, message=FALSE, warning=FALSE, results=FALSE}
+FPrared.OTU <- as.data.frame((rrarefy.perm(t(OTU.tableFP), sample = Q10, n = 100, round.out = T))) #with all samples - rarefies the data
+
+FPrared.OTU <- as.data.frame(FPrared.OTU[rowSums(FPrared.OTU) >= Q10 - (Q10 * 0.1), colSums(FPrared.OTU) >= 1]) #with some samples cut off - removes low depth samples that do not meet the cutoff
+```
 
 
 
