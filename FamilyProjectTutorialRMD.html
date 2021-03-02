@@ -434,9 +434,38 @@ summary {
 </ol>
 <pre class="r"><code>df &lt;- mtcars$mpg #assign the mpg column of dataframe mtcars to df</code></pre>
 <ol start="4" style="list-style-type: decimal">
-<li>To complement understanding of particular functions, whenever an existing data frame is modified or a new one is created visualize it either by clicking the data frame in the environment or using the View function e.g.:</li>
+<li>To complement understanding of particular functions, whenever an existing data frame is modified or a new one is created visualize it either by clicking the data frame in the environment or using the View function e.g.: <code>View(df)</code></li>
 </ol>
-<pre class="r"><code>View(df)</code></pre>
+</div>
+<div id="preparing-data-for-figures" class="section level2">
+<h2>Preparing Data for Figures</h2>
+<p>To create figures it is important to ensure that the data is prepared and formatted correctly. Before beginning, specify a desired working directory in R-studio. The metadata, taxonomy, and OTU tables found at <strong>(location we are making them accessible)</strong> are the only files needed for the completion of this tutorial.</p>
+<div id="data-import" class="section level3">
+<h3>Data Import</h3>
+<p>First the appropriate working directory, i.e. where we want R to look for our files. Change <code>File Path</code> to the location where your desired data is being kept. <em>It’s my file path for now but when were done change back to “File Path”.</em></p>
+<pre class="r"><code>setwd(&quot;E:/School/ICU/Bio/199/Family project - Quarter 1/Family Project/Figs Practice/Attempting FP figs from ABC&quot;)</code></pre>
+<p>Import the metadata file, taxonomy, and OTU Table. For the taxonomy and OTU table the first column can be specified as the row names, the metadata file will require some extra steps to be formatted properly.</p>
+<pre class="r"><code>OTU.taxonomyFP &lt;- read.delim(&quot;taxonomy.txt&quot;, row.names = 1)
+OTU.tableFP &lt;- read.delim(&quot;OTU_table.txt&quot;, row.names = 1)
+metadataFP &lt;- read.delim(&quot;Microbiome_mapping_14Oct2019.txt&quot;)</code></pre>
+<p>Ensure that all the desired files maintain a consistent formatting style. For the metadata data frame the row names must be formatted for consistency across the other files. The row names must be in the format of “X.##” - “##” being indicative of the sample number.</p>
+<pre class="r"><code>metadataFP$X.NAME &lt;- interaction( &quot;X&quot;, metadataFP$X.NAME, sep = &quot;&quot;)
+rownames(metadataFP) &lt;- metadataFP[,1]
+metadataFP[,1] &lt;- NULL</code></pre>
+</div>
+<div id="data-filtering" class="section level3">
+<h3>Data Filtering</h3>
+<p>It is important to determine if filtering is needed before continuing. An example utilizing the sample data is provided below, however, note that this procedure will not be implemented when creating the final figures at later stages in this tutorial.</p>
+<p>Merge the OTU table with taxonomy into a single data frame.</p>
+<pre class="r"><code>OTU.table.with.taxonomyFP &lt;- as.data.frame(merge(OTU.taxonomyFP, 
+                                               OTU.tableFP, by.x = &quot;row.names&quot;, by.y = &quot;row.names&quot;))</code></pre>
+<p>Remove unassigned taxa from the merged data frame. For certain diversity metrics filtering may be undesired <strong>citation needed</strong></p>
+<pre class="r"><code>OTU.table.filteredtaxaFP &lt;- OTU.table.with.taxonomyFP[!grepl(&quot;Unassigned&quot;, 
+                                                        OTU.table.with.taxonomyFP$Kingdom),]</code></pre>
+<p>Subset the original OTU table with the filtered taxa to create a filtered OTU table.</p>
+<pre class="r"><code>FPfilteredtaxa &lt;- OTU.table.filteredtaxaFP$Row.names
+FPfilterOTU &lt;- subset(OTU.tableFP, rownames(OTU.tableFP) %in% FPfilteredtaxa)</code></pre>
+</div>
 </div>
 
 

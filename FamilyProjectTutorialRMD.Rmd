@@ -28,10 +28,67 @@ or
 ```{r}
 df <- mtcars$mpg #assign the mpg column of dataframe mtcars to df
 ```
-4. To complement understanding of particular functions, whenever an existing data frame is modified or a new one is created visualize it either by clicking the data frame in the environment or using the View function e.g.:
+4. To complement understanding of particular functions, whenever an existing data frame is modified or a new one is created visualize it either by clicking the data frame in the environment or using the View function e.g.: `View(df)`
 
-```{r}
-View(df)
-```
+## Preparing Data for Figures 
+
+ To create figures it is important to ensure that the data is prepared and formatted correctly. Before beginning, specify a desired working directory in R-studio. The metadata, taxonomy, and OTU tables found at **(location we are making them accessible)** are the only files needed for the completion of this tutorial. 
  
+### Data Import 
+
+First set the appropriate working directory, i.e. where we want R to look for our files. Change `File Path` to the location where your desired data is being kept. *It's my file path for now but when were done change back to "File Path".*
+```{r}
+setwd("E:/School/ICU/Bio/199/Family project - Quarter 1/Family Project/Figs Practice/Attempting FP figs from ABC")
+```
+
+Import the metadata file, taxonomy, and OTU Table. For the taxonomy and OTU table the first column can be specified as the row names, the metadata file will require some extra steps to be formatted properly. 
+```{r}
+OTU.taxonomyFP <- read.delim("taxonomy.txt", row.names = 1)
+OTU.tableFP <- read.delim("OTU_table.txt", row.names = 1)
+metadataFP <- read.delim("Microbiome_mapping_14Oct2019.txt")
+```
+
+Ensure that all the desired files maintain a consistent formatting style. For the metadata data frame the row names must be formatted for consistency across the other files. The row names must be in the format of “X.##” -  “##” being indicative of the sample number. 
+```{r}
+metadataFP$X.NAME <- interaction( "X", metadataFP$X.NAME, sep = "")
+rownames(metadataFP) <- metadataFP[,1]
+metadataFP[,1] <- NULL
+```
+
+### Data Filtering 
+
+It is important to determine if filtering is needed before continuing. An example utilizing the sample data is provided below, however, note that this procedure will not be implemented when creating the final figures at later stages in this tutorial. 
+
+Merge the OTU table with taxonomy into a single data frame. 
+```{r}
+OTU.table.with.taxonomyFP <- as.data.frame(merge(OTU.taxonomyFP, 
+                                               OTU.tableFP, by.x = "row.names", by.y = "row.names"))
+```
+
+Remove unassigned taxa from the merged data frame. For certain diversity metrics filtering may be undesired **citation needed**
+```{r}
+OTU.table.filteredtaxaFP <- OTU.table.with.taxonomyFP[!grepl("Unassigned", 
+                                                        OTU.table.with.taxonomyFP$Kingdom),]
+```
+
+Subset the original OTU table with the filtered taxa to create a filtered OTU table. 
+```{r}
+FPfilteredtaxa <- OTU.table.filteredtaxaFP$Row.names
+FPfilterOTU <- subset(OTU.tableFP, rownames(OTU.tableFP) %in% FPfilteredtaxa)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
