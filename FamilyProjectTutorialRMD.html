@@ -496,8 +496,13 @@ FPrared.OTU &lt;- as.data.frame(FPrared.OTU[rowSums(FPrared.OTU) &gt;= Q10 - (Q1
 <p>Alpha diversity refers to microbial diversity found within a sample or in the environment. Each alpha diversity sample contains richness metrics which quantify the OTUs, or unique species present within a sample, and evenness metrics which evaluate how equally each species is represented in a sample. Three commonly used indices: Shannon, Simpson, and Chao may produce different results based on the weights placed on evaluation metrics. Of these indices, Chao is incapable of capturing the scope of microbial diversity and as such the Shannon and Simpson indices will be further explored (Qian et al., 2020).</p>
 <p>Shannon and Simpson diversity both calculate alpha diversity through a combination of richness and evenness metrics. However, they differ in regard to the weight assigned to certain species types. The Shannon index ranges from 0-5, with higher values indicative of greater diversity, however greater weight is placed on presence of rarer taxa which would increase this value. In contrast to this the Simpson index ranges from 0-1 but emphasizes common taxa instead (Citation).</p>
 <p>It is best to consider which particular index applies to each dataset and utilize whichever produces the most sound results. In this study the Shannon index was utilized to generate an alpha diversity figure between the four familial cohorts.</p>
-<div id="generating-the-α-diversity-plot-in-r." class="section level3">
-<h3>Generating the α-diversity plot in R.</h3>
+<div id="generating-the-α-diversity-plot-in-r" class="section level3">
+<h3>Generating the α-diversity plot in R</h3>
+<p>Create a richness table from the rarefied OTU table. Not that rarefaction may induce changes in diversity metrics, ensure that it is done properly for the dataset of interest. Rename the column to something identifiable, in this case “speciesrich”</p>
+<pre class="r"><code>FPrichness &lt;- as.data.frame(specnumber(FPrared.OTU))
+colnames(FPrichness) &lt;- c(&quot;speciesrich&quot;)
+FPshannon &lt;- as.data.frame(diversity(FPrared.OTU, index = &quot;shannon&quot;))
+colnames(FPshannon) &lt;- c(&#39;alpha_shannon&#39;)</code></pre>
 </div>
 </div>
 

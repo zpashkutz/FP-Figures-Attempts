@@ -126,6 +126,16 @@ It is best to consider which particular index applies to each dataset and utiliz
 
 ### Generating the α-diversity plot in R 
 
+Create a richness table from the rarefied OTU table. Not that rarefaction may induce changes in diversity metrics, ensure that it is done properly for the dataset of interest. 
+Rename the column to something identifiable, in this case “speciesrich” 
+```{r}
+FPrichness <- as.data.frame(specnumber(FPrared.OTU))
+colnames(FPrichness) <- c("speciesrich")
+FPshannon <- as.data.frame(diversity(FPrared.OTU, index = "shannon"))
+colnames(FPshannon) <- c('alpha_shannon')
+```
+
+
 
 
 
