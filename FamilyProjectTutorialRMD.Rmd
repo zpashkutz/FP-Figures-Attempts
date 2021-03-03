@@ -38,7 +38,7 @@ df <- mtcars$mpg #assign the mpg column of dataframe mtcars to df
 
 First set the appropriate working directory, i.e. where we want R to look for our files. Change `File Path` to the location where your desired data is being kept. *It's my file path for now but when were done change back to "File Path".*
 ```{r}
-setwd("C:/Users/Zach/Documents/Microbiome Family Project")
+setwd("E:/School/ICU/Bio/199/Family project - Quarter 1/Family Project/Figs Practice/Attempting FP figs from ABC")
 ```
 
 Import the metadata file, taxonomy, and OTU Table. For the taxonomy and OTU table the first column can be specified as the row names, the metadata file will require some extra steps to be formatted properly. 
