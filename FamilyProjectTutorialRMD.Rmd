@@ -38,7 +38,7 @@ df <- mtcars$mpg #assign the mpg column of dataframe mtcars to df
 
 First set the appropriate working directory, i.e. where we want R to look for our files. Change `File Path` to the location where your desired data is being kept. *It's my file path for now but when were done change back to "File Path".*
 ```{r}
-setwd("E:/School/ICU/Bio/199/Family project - Quarter 1/Family Project/Figs Practice/Attempting FP figs from ABC")
+setwd("C:/Users/Zach/Documents/Microbiome Family Project")
 ```
 
 Import the metadata file, taxonomy, and OTU Table. For the taxonomy and OTU table the first column can be specified as the row names, the metadata file will require some extra steps to be formatted properly. 
@@ -50,7 +50,7 @@ metadataFP <- read.delim("Microbiome_mapping_14Oct2019.txt")
 
 Ensure that all the desired files maintain a consistent formatting style. For the metadata data frame the row names must be formatted for consistency across the other files. The row names must be in the format of “X.##” -  “##” being indicative of the sample number. 
 ```{r}
-metadataFP$X.NAME <- interaction( "X", metadataFP$X.NAME, sep = "")
+metadataFP$NAME <- interaction( "X", metadataFP$NAME, sep = "")
 rownames(metadataFP) <- metadataFP[,1]
 metadataFP[,1] <- NULL
 ```
@@ -135,14 +135,75 @@ FPshannon <- as.data.frame(diversity(FPrared.OTU, index = "shannon"))
 colnames(FPshannon) <- c('alpha_shannon')
 ```
 
+## Beta Diversity
+
+Beta diversity shows the difference in diversity between two samples or environments. Two common forms of beta diversity are PCoA and NMDS. With each of these visuals, one can get a sense of how similar samples are by how close in proximity points appear on these graphs. There are several different ways to compose beta diversity plots, which vary in both dimensions used and the distance metric applied. With NMDS in particular, two environments are compared by a certain number of dimensions, usually narrowed down as much as possible for a correlation to be made, but also still retaining the accuracy of the initial data. Each beta diversity plot utilizes a distance metric, for example, Euclidean distance for PCoA. In the tutorial below, a distance metric called Bray-Curtis dissimilarity is used. 
+
+The beta diversity tutorial will use the Family Project rarefied OTU table (produce this in rarefaction section first) and the microbiome mapping data.
+
+Initialize plot with rarefaction OTU table, bray-curtis dissimilarity and 2 dimensions(k):
+```{r, results=FALSE}
+NMDS1 <- metaMDS(FPrared.OTU, distance = "bray", k = 2)
+```
+
+Extract the two axes from the NMDS to plot x and y coordinates
+```{r}
+coordinates <- data.frame(NMDS1$points[,1:2])
+```
+
+
+Plot - MDS1 is the x axis, MDS2 is the y axis. This is not the complete plot however, microbiome mapping must be added next.
+```{r}
+plot(x = coordinates$MDS1, y = coordinates$MDS2)
+```
+
+Merge the NMDS with Microbiome_mapping:
+```{r}
+nmds_plus_metadataFP <- merge(coordinates, metadataFP, by = 0)
+```
+
+Choose a factor to compare the environments. In this case, we compare them by “Family”:
+```{r}
+Factor_x <- as.factor(nmds_plus_metadataFP$Family)
+```
+
+Plot without rarefaction:
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+
+ggplot(data = nmds_plus_metadataFP) +
+  aes(x = MDS1, y = MDS2, color = Family)+ #Creates and colors legend
+  geom_point(size = 3) + #modifies points
+  labs(col = "Family") + #Renames legend, modifiable. 
+  theme_bw()
+```
+
+
+(Implement the following if the data is goes through rarefaction)
+```{r}
+filtersamples <- rownames(FPrared.OTU)
+filtermapping <- subset(metadataFP, rownames(metadataFP) %in% filtersamples)
+```
+
+Adonis test (explain more):
+```{r, results=FALSE}
+adonis(data = filtermapping, formula = FPrared.OTU ~ Family 
+       / Individual + Day + Day:Family,
+       permutations = 999, method = "bray")
+
+adonis(data = filtermapping, formula = FPrared.OTU ~ Family
+       /Individual/Day,
+       permutations = 999, method = "bray")
+```
 
 
 
-
-
-
-
-
-
-
-
+Plot with rarefaction:
+```{r}
+ggplot(data = nmds_plus_metadataFP) +
+  aes(x = MDS1, y = MDS2, color = Family) +
+  geom_point() +
+  labs(fill = "Family") +
+  ggtitle("NMDS of Families on Oral Microbiome") + #adds title
+  theme_classic(base_size = 14, base_line_size = .5)
+```
